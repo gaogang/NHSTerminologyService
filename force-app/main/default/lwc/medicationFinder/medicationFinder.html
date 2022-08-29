@@ -1,0 +1,46 @@
+<template>
+  <lightning-card title="Medication Finder" icon-name="custom:custom14">
+      <div class="slds-m-around_medium">
+        <lightning-input label="Medication" value={searching} onchange={changeHandler}></lightning-input>
+      </div>
+      <div data-id="searchresults" class="c-container slds-hidden">
+        <lightning-layout multiple-rows="true">
+          <lightning-layout-item padding="around-small" size="12">
+              <lightning-layout>
+                  <lightning-layout-item padding="around-small" size="6">
+                    <div class="page-section page-main">
+                      <template for:each={results} for:item="result">
+                        <div class="medication-list-item" key={result.code} onclick={clickHandler}>
+                            <p>Code: {result.code}</p>
+                            <p>Name: {result.display}</p>
+                        </div>
+                      </template>
+                    </div>
+                  </lightning-layout-item>
+                  <lightning-layout-item padding="around-small" size="6">
+                      <div class="page-section page-right">
+                          <p>Donec viverra pellentesque aliquet. Praesent quis tristique mauris, ac tincidunt ante.
+                              Nulla lectus nisi, tempor quis malesuada ac, consequat in velit. Nullam aliquam mauris eu magna
+                              dictum, in ornare risus convallis. Nunc condimentum ornare libero sit amet rhoncus. Aliquam tellus nisl,
+                              tristique sit amet congue in, tristique vel risus. Morbi leo ligula, blandit nec commodo at, pulvinar
+                              vitae libero. Mauris ipsum erat, aliquam a turpis vitae, faucibus viverra arcu. Donec id purus
+                              luctus enim elementum molestie sit amet ac libero.
+                          </p>
+                          <p>Mauris cursus felis elementum ipsum placerat, in maximus justo pretium. Nam nec sapien
+                              maximus justo feugiat tristique. Mauris viverra erat vitae arcu feugiat, sed posuere purus vulputate.
+                              Sed et nulla ut magna iaculis fringilla. Integer eget blandit elit. Phasellus nulla augue, lobortis a
+                              elementum tempus, auctor et felis. Fusce quis lorem tincidunt risus ullamcorper pharetra. Sed elit
+                              nulla, efficitur a lorem quis, mollis tristique elit. Etiam odio libero, ornare sed vehicula
+                              in, sagittis et erat. Integer at justo molestie, suscipit dui vel, scelerisque ex. Nulla non metus
+                              pulvinar, egestas neque et, tincidunt tellus. Praesent egestas scelerisque tristique. Nullam
+                              sodales ex acmetus tincidunt accumsan. Cras vitae consequat odio. Pellentesque facilisis lobortis
+                              lorem, at placerat mauris sagittis a.
+                          </p>
+                      </div>
+                  </lightning-layout-item>
+              </lightning-layout>
+          </lightning-layout-item>
+        </lightning-layout>
+      </div>
+  </lightning-card>
+</template>
