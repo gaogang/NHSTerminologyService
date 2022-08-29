@@ -19,7 +19,7 @@ export default class MedicationFinder extends LightningElement {
             console.log('Access token not available - re-authenticate...');
             fetch("https://ontology.nhs.uk/authorisation/auth/realms/nhs-digital-terminology/protocol/openid-connect/token", {
                 method: 'POST',
-                body: 'grant_type=client_credentials&client_id=Salesforce_Consumer&client_secret=058a1404-26c4-450b-9acd-894610bfaed8',
+                body: 'grant_type=client_credentials&client_id=[clientId]&client_secret=[clientSecret]',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
