@@ -2,6 +2,22 @@
     border: 1px solid #d8dde6;
     margin: 10px 0 20px 0;
 }
+
+.field-title {
+    color: #54698d;
+    font-size: 0.85rem;
+    font-weight: bold;
+    line-height: 1.25;
+    margin-bottom: 0.75em;
+    padding-right: 2.5em;
+}
+
+.field {
+    font-size: 0.85rem;
+    line-height: 1.25;
+    margin-bottom: 0.75em;
+}
+
 .page-section {
     border: solid 1px #ccc;
     padding: 1rem;
@@ -22,4 +38,11 @@
 
 .medication-list-item:hover {
     background: #e5e5e5;
+}
+
+.summary-heading {
+    margin-top: 6px;
+    margin-bottom: 12px;
+    font-size: large;
+    font-weight: bold;
 }
