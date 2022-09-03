@@ -6,6 +6,7 @@ export default class MedicationFinder extends LightningElement {
 
     token = '';
 
+    sel_type = 'xxxxxx';
     sel_name = 'xxxxxx';
     sel_code = 'xxxxxx';
     sel_dfi = {
@@ -73,7 +74,7 @@ export default class MedicationFinder extends LightningElement {
                 return this.token;
             })
             .then(token => {
-                fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand?url=https://dmd.nhs.uk/ValueSet/VMP&count=10&&filter=" + this.searching + "&property=*", {
+                fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand?url=https://dmd.nhs.uk/ValueSet/VTM&count=10&&filter=" + this.searching + "&property=*", {
                     method: 'GET',
                     credentials: 'same-origin' ,
                     headers: {
@@ -91,7 +92,7 @@ export default class MedicationFinder extends LightningElement {
             });
         } else {
             console.log('Access token available - start searching...');
-            fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand?url=https://dmd.nhs.uk/ValueSet/VMP&count=10&&filter=" + this.searching + "&property=*", {
+            fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand?url=https://dmd.nhs.uk/ValueSet/VTM&count=10&&filter=" + this.searching + "&property=*", {
                 method: 'GET',
                 credentials: 'same-origin' ,
                 headers: {
@@ -127,7 +128,20 @@ export default class MedicationFinder extends LightningElement {
                 if (element.name === 'display') {
                     this.sel_name = element.valueString;
                 } else if(element.name === 'property') {
-                    if (element.part.length > 2) {
+                    if (element.part.length >= 2) {
+                        // Determine medication type
+                        if (element.part[0].name === 'code' && 
+                            element.part[0].valueCode === 'parent' && 
+                            element.part[1].name === 'value') { 
+                            if (element.part[1].valueCode === 'VTM') {
+                                this.sel_type = 'VTM';
+                            } else if (element.part[1].valueCode === 'VMP') {
+                                this.sel_type = 'VMP';
+                            } else if (element.part[1].valueCode === 'AMP') {
+                                this.sel_type = 'AMP';
+                            }
+                        }
+
                         if (element.part[0].name === 'code' && element.part[0].valueCode === 'DF_INDCD') {
                             this.sel_dfi = {
                                 system: element.part[1].valueCoding.system,
