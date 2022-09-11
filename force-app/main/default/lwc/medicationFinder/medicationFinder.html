@@ -22,13 +22,13 @@
                         <div data-id="vtmresults">
                           <div class="medication-type">VMP</div>
                           <template for:each={sel_vmp} for:item="vmp">
-                            <div class="medication-list-item" id={vmp.code} key={vmp.code}>
+                            <div class="medication-list-item" id={vmp.code} key={vmp.code} onclick={vmpClickHandler}>
                                 <p>Code: {vmp.code}</p>
                                 <p>Name: {vmp.display}</p>
                             </div>
                           </template>
                         </div>
-                        <div data-id="vmpresult" class="slds-hidden">
+                        <div data-id="vmpresults" class="slds-hidden">
                           <div class="medication-type">{sel_type}</div>
                           <p class="summary-heading">Name</p>
                           <div>{sel_name}</div>

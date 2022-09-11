@@ -116,6 +116,59 @@ export default class MedicationFinder extends LightningElement {
         this.sel_vmp = [];
         this.sel_code = event.currentTarget.getAttribute('id').replace('-93', '');
         var searchingCodes = "";
+        // Search for VTM
+        fetch("https://ontology.nhs.uk/production1/fhir/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
+            method: 'GET',
+            credentials: 'same-origin' ,
+            headers: {
+                'content-type': 'application/json',
+                'authorization': 'Bearer ' + this.token
+            }
+        })
+        .then(response => {
+            return response.json();
+        })
+        .then(json => {
+            alert(JSON.stringify(json));
+            json.parameter.forEach(element => {
+                if(element.name === 'property') {
+                    if (element.part[0].name === 'code' && 
+                        element.part[0].valueCode === 'child' &&
+                        element.part[1].name === 'value') {
+                        searchingCodes = searchingCodes + element.part[1].valueCode + ",";
+                    }
+                }
+            });
+
+            alert(searchingCodes);
+
+            if (searchingCodes.length !== 0) {
+                var body = '{"resourceType": "Parameters", "parameter": [{"name": "valueSet", "resource": {"resourceType": "ValueSet", "compose": {"include": [{"system": "https://dmd.nhs.uk", "filter": [{"property": "code", "op": "in", "value": "' + searchingCodes +'"}]}]}}}, {"name": "count", "valueInteger": 100}]}';
+                // Search for the VMPs
+                fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand", {
+                    method: 'POST',
+                    credentials: 'same-origin' ,
+                    headers: {
+                        'content-type': 'application/json',
+                        'authorization': 'Bearer ' + this.token
+                    },
+                    body: body
+                })
+                .then(response => {
+                    return response.json();
+                })
+                .then(json => {
+                    this.sel_vmp = json.expansion.contains;
+                });
+            }
+            this.showVTM();
+        });
+    }
+
+    vmpClickHandler(event) {
+        this.sel_code = event.currentTarget.getAttribute('id').replace('-93', '');
+        alert(this.sel_code);
+
         // Search for VMP
         fetch("https://ontology.nhs.uk/production1/fhir/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
             method: 'GET',
@@ -144,15 +197,6 @@ export default class MedicationFinder extends LightningElement {
                                 this.sel_type = 'VMP';
                             } else if (element.part[1].valueCode === 'AMP') {
                                 this.sel_type = 'AMP';
-                            }
-                        }
-
-                        // Get children
-                        if (this.sel_type === 'VTM') {
-                            if (element.part[0].name === 'code' && 
-                                element.part[0].valueCode === 'child' &&
-                                element.part[1].name === 'value') {
-                                searchingCodes = searchingCodes + element.part[1].valueCode + ",";
                             }
                         }
 
@@ -207,73 +251,51 @@ export default class MedicationFinder extends LightningElement {
                     }
                 }
             });
-
-            if (this.sel_type === 'VTM') {
-                if (searchingCodes.length !== 0) {
-                    var body = '{"resourceType": "Parameters", "parameter": [{"name": "valueSet", "resource": {"resourceType": "ValueSet", "compose": {"include": [{"system": "https://dmd.nhs.uk", "filter": [{"property": "code", "op": "in", "value": "' + searchingCodes +'"}]}]}}}, {"name": "count", "valueInteger": 100}]}';
-                    // Search for the VMPs
-                    fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand", {
-                        method: 'POST',
-                        credentials: 'same-origin' ,
-                        headers: {
-                            'content-type': 'application/json',
-                            'authorization': 'Bearer ' + this.token
-                        },
-                        body: body
-                    })
-                    .then(response => {
-                        return response.json();
-                    })
-                    .then(json => {
-                        this.sel_vmp = json.expansion.contains;
-                    });
-                }
-                this.showVTM();
-            } else {
-                this.hideVTM();
-            }
+            this.showVMP();
         });
     }
 
     showResult() {
         var divblock = this.template.querySelector('[data-id="searchresults"]');
         if(divblock){
-            divblock.className='c-container slds-visible';
+            divblock.className='c-container slds-show';
         }
     }
 
     showVTM() {
+        this.hideVMP();
         var divblock = this.template.querySelector('[data-id="vtmresults"]');
         if(divblock){
-            divblock.className='slds-visible';
+            divblock.className='slds-show';
         }
     }
 
     showVMP() {
+        this.hideVTM();
         var divblock = this.template.querySelector('[data-id="vmpresults"]');
         if(divblock){
-            divblock.className='slds-visible';
+            divblock.className='slds-show';
         }
     }
 
     hideResult() {
         var divblock = this.template.querySelector('[data-id="searchresults"]');
         if(divblock){
-            divblock.className='c-container slds-hidden';
+            divblock.className='c-container slds-hide';
         }
     }
 
     hideVTM() {
         var divblock = this.template.querySelector('[data-id="vtmresults"]');
         if(divblock){
-            divblock.className='slds-hidden';
+            divblock.className='slds-hide';
         }
     }
 
     hideVMP() {
         var divblock = this.template.querySelector('[data-id="vmpresults"]');
         if(divblock){
-            divblock.className='slds-hidden';
+            divblock.className='slds-hide';
         }
     }
 }
