@@ -46,6 +46,7 @@ export default class MedicationFinder extends LightningElement {
         system: 'xxxxxx',
         code: 'xxxxxx'
     };
+    sel_vmp = [];
 
     changeHandler(event) {
         this.searching = event.target.value;
@@ -73,6 +74,7 @@ export default class MedicationFinder extends LightningElement {
                 this.token = json.access_token;
                 return this.token;
             })
+            // Search for VTM
             .then(token => {
                 fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand?url=https://dmd.nhs.uk/ValueSet/VTM&count=10&&filter=" + this.searching + "&property=*", {
                     method: 'GET',
@@ -110,8 +112,11 @@ export default class MedicationFinder extends LightningElement {
         }
     }
 
-    clickHandler(event) {
+    vtmClickHandler(event) {
+        this.sel_vmp = [];
         this.sel_code = event.currentTarget.getAttribute('id').replace('-93', '');
+        var searchingCodes = "";
+        // Search for VMP
         fetch("https://ontology.nhs.uk/production1/fhir/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
             method: 'GET',
             credentials: 'same-origin' ,
@@ -139,6 +144,15 @@ export default class MedicationFinder extends LightningElement {
                                 this.sel_type = 'VMP';
                             } else if (element.part[1].valueCode === 'AMP') {
                                 this.sel_type = 'AMP';
+                            }
+                        }
+
+                        // Get children
+                        if (this.sel_type === 'VTM') {
+                            if (element.part[0].name === 'code' && 
+                                element.part[0].valueCode === 'child' &&
+                                element.part[1].name === 'value') {
+                                searchingCodes = searchingCodes + element.part[1].valueCode + ",";
                             }
                         }
 
@@ -193,6 +207,31 @@ export default class MedicationFinder extends LightningElement {
                     }
                 }
             });
+
+            if (this.sel_type === 'VTM') {
+                if (searchingCodes.length !== 0) {
+                    var body = '{"resourceType": "Parameters", "parameter": [{"name": "valueSet", "resource": {"resourceType": "ValueSet", "compose": {"include": [{"system": "https://dmd.nhs.uk", "filter": [{"property": "code", "op": "in", "value": "' + searchingCodes +'"}]}]}}}, {"name": "count", "valueInteger": 100}]}';
+                    // Search for the VMPs
+                    fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand", {
+                        method: 'POST',
+                        credentials: 'same-origin' ,
+                        headers: {
+                            'content-type': 'application/json',
+                            'authorization': 'Bearer ' + this.token
+                        },
+                        body: body
+                    })
+                    .then(response => {
+                        return response.json();
+                    })
+                    .then(json => {
+                        this.sel_vmp = json.expansion.contains;
+                    });
+                }
+                this.showVTM();
+            } else {
+                this.hideVTM();
+            }
         });
     }
 
@@ -203,10 +242,38 @@ export default class MedicationFinder extends LightningElement {
         }
     }
 
+    showVTM() {
+        var divblock = this.template.querySelector('[data-id="vtmresults"]');
+        if(divblock){
+            divblock.className='slds-visible';
+        }
+    }
+
+    showVMP() {
+        var divblock = this.template.querySelector('[data-id="vmpresults"]');
+        if(divblock){
+            divblock.className='slds-visible';
+        }
+    }
+
     hideResult() {
         var divblock = this.template.querySelector('[data-id="searchresults"]');
         if(divblock){
             divblock.className='c-container slds-hidden';
+        }
+    }
+
+    hideVTM() {
+        var divblock = this.template.querySelector('[data-id="vtmresults"]');
+        if(divblock){
+            divblock.className='slds-hidden';
+        }
+    }
+
+    hideVMP() {
+        var divblock = this.template.querySelector('[data-id="vmpresults"]');
+        if(divblock){
+            divblock.className='slds-hidden';
         }
     }
 }

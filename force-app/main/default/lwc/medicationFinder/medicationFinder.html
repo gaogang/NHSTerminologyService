@@ -10,7 +10,7 @@
                   <lightning-layout-item padding="around-small" size="6">
                     <div class="page-section page-main">
                       <template for:each={results} for:item="result">
-                        <div class="medication-list-item" id={result.code} key={result.code} onclick={clickHandler}>
+                        <div class="medication-list-item" id={result.code} key={result.code} onclick={vtmClickHandler}>
                             <p>Code: {result.code}</p>
                             <p>Name: {result.display}</p>
                         </div>
@@ -19,52 +19,63 @@
                   </lightning-layout-item>
                   <lightning-layout-item padding="around-small" size="6">
                       <div class="page-section page-right">
-                        <div class="medication-type">{sel_type}</div>
-                        <p class="summary-heading">Name</p>
-                        <div>{sel_name}</div>
-                        <p class="summary-heading">Code</p>
-                        <lightning-layout>
-                          <lightning-layout-item>
-                            <div class="field-title">SNOMED Code</div>
-                          </lightning-layout-item>
-                          <lightning-layout-item>
-                            <div class="field">{sel_code}</div>
-                          </lightning-layout-item>
-                        </lightning-layout>
-                        <p class="summary-heading">Unit Dose and Form Information</p>
-                        <lightning-layout>
-                          <lightning-layout-item>
-                            <p class="field-title">DF Indicator</p>
-                            <p class="field-title">UDFS Indicator</p>
-                            <p class="field-title">UDFS UOM</p>
-                            <p class="field-title">Unit Dose UOM</p>
-                          </lightning-layout-item>
-                          <lightning-layout-item>
-                            <p class="field">{sel_dfi.code}</p>
-                            <p class="field">{sel_udfs}</p>
-                            <p class="field">{sel_udfs_uom.code}</p>
-                            <p class="field">{sel_unitdose_uom.code}</p>
-                          </lightning-layout-item>
-                        </lightning-layout>
-                        <p class="summary-heading">Summary</p>
-                        <lightning-layout>
-                          <lightning-layout-item>
-                            <p class="field-title">Prescribing Status</p>
-                            <p class="field-title">Controlled Drug Category</p>
-                            <p class="field-title">Route</p>
-                            <p class="field-title">Form</p>
-                            <p class="field-title">Ontology Form / Route</p>
-                            <p class="field-title">Name Basis</p>
-                          </lightning-layout-item>
-                          <lightning-layout-item>
-                            <p class="field">{sel_prescribing_status.code}</p>
-                            <p class="field">{sel_controlled_drug_category.code}</p>
-                            <p class="field">{sel_route.code}</p>
-                            <p class="field">{sel_form.code}</p>
-                            <p class="field">{sel_ontology_form.code}</p>
-                            <p class="field">{sel_basis.code}</p>
-                          </lightning-layout-item>
-                        </lightning-layout>>
+                        <div data-id="vtmresults">
+                          <div class="medication-type">VMP</div>
+                          <template for:each={sel_vmp} for:item="vmp">
+                            <div class="medication-list-item" id={vmp.code} key={vmp.code}>
+                                <p>Code: {vmp.code}</p>
+                                <p>Name: {vmp.display}</p>
+                            </div>
+                          </template>
+                        </div>
+                        <div data-id="vmpresult" class="slds-hidden">
+                          <div class="medication-type">{sel_type}</div>
+                          <p class="summary-heading">Name</p>
+                          <div>{sel_name}</div>
+                          <p class="summary-heading">Code</p>
+                          <lightning-layout>
+                            <lightning-layout-item>
+                              <div class="field-title">SNOMED Code</div>
+                            </lightning-layout-item>
+                            <lightning-layout-item>
+                              <div class="field">{sel_code}</div>
+                            </lightning-layout-item>
+                          </lightning-layout>
+                          <p class="summary-heading">Unit Dose and Form Information</p>
+                          <lightning-layout>
+                            <lightning-layout-item>
+                              <p class="field-title">DF Indicator</p>
+                              <p class="field-title">UDFS Indicator</p>
+                              <p class="field-title">UDFS UOM</p>
+                              <p class="field-title">Unit Dose UOM</p>
+                            </lightning-layout-item>
+                            <lightning-layout-item>
+                              <p class="field">{sel_dfi.code}</p>
+                              <p class="field">{sel_udfs}</p>
+                              <p class="field">{sel_udfs_uom.code}</p>
+                              <p class="field">{sel_unitdose_uom.code}</p>
+                            </lightning-layout-item>
+                          </lightning-layout>
+                          <p class="summary-heading">Summary</p>
+                          <lightning-layout>
+                            <lightning-layout-item>
+                              <p class="field-title">Prescribing Status</p>
+                              <p class="field-title">Controlled Drug Category</p>
+                              <p class="field-title">Route</p>
+                              <p class="field-title">Form</p>
+                              <p class="field-title">Ontology Form / Route</p>
+                              <p class="field-title">Name Basis</p>
+                            </lightning-layout-item>
+                            <lightning-layout-item>
+                              <p class="field">{sel_prescribing_status.code}</p>
+                              <p class="field">{sel_controlled_drug_category.code}</p>
+                              <p class="field">{sel_route.code}</p>
+                              <p class="field">{sel_form.code}</p>
+                              <p class="field">{sel_ontology_form.code}</p>
+                              <p class="field">{sel_basis.code}</p>
+                            </lightning-layout-item>
+                          </lightning-layout>>
+                        </div>
                       </div>
                   </lightning-layout-item>
               </lightning-layout>
