@@ -3,7 +3,7 @@
       <div class="slds-m-around_medium">
         <lightning-input label="Medication" value={searching} onchange={changeHandler}></lightning-input>
       </div>
-      <div data-id="searchresults" class="c-container slds-hidden">
+      <div data-id="searchresults" class="c-container slds-hide">
         <lightning-layout multiple-rows="true">
           <lightning-layout-item padding="around-small" size="12">
               <lightning-layout>
@@ -19,7 +19,7 @@
                   </lightning-layout-item>
                   <lightning-layout-item padding="around-small" size="6">
                       <div class="page-section page-right">
-                        <div data-id="vtmresults" class="slds-hidden">
+                        <div data-id="vtmresults" class="slds-hide">
                           <div class="medication-type">VMP</div>
                           <template for:each={sel_vmp} for:item="vmp">
                             <div class="medication-list-item" id={vmp.code} key={vmp.code} onclick={vmpClickHandler}>
@@ -28,7 +28,7 @@
                             </div>
                           </template>
                         </div>
-                        <div data-id="vmpresults" class="slds-hidden">
+                        <div data-id="vmpresults" class="slds-hide">
                           <div class="medication-type">{sel_type}</div>
                           <p class="summary-heading">Name</p>
                           <div>{sel_name}</div>
