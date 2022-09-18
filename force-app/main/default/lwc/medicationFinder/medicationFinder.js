@@ -1,3 +1,4 @@
+import TickerSymbol from '@salesforce/schema/Account.TickerSymbol';
 import { LightningElement } from 'lwc';
 
 export default class MedicationFinder extends LightningElement {
@@ -6,13 +7,11 @@ export default class MedicationFinder extends LightningElement {
 
     token = '';
 
-    sel_type = 'xxxxxx';
-    sel_name = 'xxxxxx';
-    sel_code = 'xxxxxx';
-    sel_dfi = {
-        system: 'xxxxxx',
-        code: 'xxxxxx'
-    };
+    sel_name = "xxxxx";
+    sel_code = "xxxxx";
+    sel_type = "xxxxx";
+    sel_vmp = [];
+    sel_dfi = 'xxxxxx';
     sel_udfs = 0;
     sel_udfs_uom = {
         system: 'xxxxxx',
@@ -46,7 +45,8 @@ export default class MedicationFinder extends LightningElement {
         system: 'xxxxxx',
         code: 'xxxxxx'
     };
-    sel_vmp = [];
+
+    codingSystems = [];
 
     changeHandler(event) {
         this.searching = event.target.value;
@@ -113,8 +113,9 @@ export default class MedicationFinder extends LightningElement {
     }
 
     vtmClickHandler(event) {
-        this.sel_vmp = [];
         this.sel_code = event.currentTarget.getAttribute('id').replace('-93', '');
+
+        this.sel_vmp = [];
         var searchingCodes = "";
         // Search for VTM
         fetch("https://ontology.nhs.uk/production1/fhir/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
@@ -129,7 +130,6 @@ export default class MedicationFinder extends LightningElement {
             return response.json();
         })
         .then(json => {
-            alert(JSON.stringify(json));
             json.parameter.forEach(element => {
                 if(element.name === 'property') {
                     if (element.part[0].name === 'code' && 
@@ -139,8 +139,6 @@ export default class MedicationFinder extends LightningElement {
                     }
                 }
             });
-
-            alert(searchingCodes);
 
             if (searchingCodes.length !== 0) {
                 var body = '{"resourceType": "Parameters", "parameter": [{"name": "valueSet", "resource": {"resourceType": "ValueSet", "compose": {"include": [{"system": "https://dmd.nhs.uk", "filter": [{"property": "code", "op": "in", "value": "' + searchingCodes +'"}]}]}}}, {"name": "count", "valueInteger": 100}]}';
@@ -167,7 +165,11 @@ export default class MedicationFinder extends LightningElement {
 
     vmpClickHandler(event) {
         this.sel_code = event.currentTarget.getAttribute('id').replace('-93', '');
-        alert(this.sel_code);
+        var dfi = {
+            system: "",
+            code: "",
+            display: ""
+        };
 
         // Search for VMP
         fetch("https://ontology.nhs.uk/production1/fhir/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
@@ -182,6 +184,7 @@ export default class MedicationFinder extends LightningElement {
             return response.json();
         })
         .then(json => {
+            var codeSearching = [];
             json.parameter.forEach(element => {
                 if (element.name === 'display') {
                     this.sel_name = element.valueString;
@@ -200,10 +203,39 @@ export default class MedicationFinder extends LightningElement {
                             }
                         }
 
+                        var display = '';
                         if (element.part[0].name === 'code' && element.part[0].valueCode === 'DF_INDCD') {
-                            this.sel_dfi = {
+                            var system = element.part[1].valueCoding.system;
+                            if (this.codingSystems[system]) {
+                                this.codingSystems[system].forEach(s => {
+                                    if (s === element.part[1].valueCoding.code) {
+                                        display = s.display;
+                                    }
+                                });
+                            }
+
+                            if (display === '') {
+                                // Add code to the searching list
+                                var systemExist = false;
+                                codeSearching.forEach(cs => {
+                                    if (cs.system === system) {
+                                        cs.code.push(element.part[1].valueCoding.code);
+                                        systemExist = true;
+                                    }
+                                });
+
+                                if (!systemExist) {
+                                    codeSearching.push({
+                                        system: system,
+                                        code: [element.part[1].valueCoding.code]
+                                    });
+                                }
+                            }
+
+                            dfi = {
                                 system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code
+                                code: element.part[1].valueCoding.code,
+                                display: display
                             };
                         } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'UDFS') {
                             this.sel_udfs = element.part[1].valueDecimal;
@@ -251,7 +283,52 @@ export default class MedicationFinder extends LightningElement {
                     }
                 }
             });
-            this.showVMP();
+            
+            // search for the missing display
+            if (codeSearching.length !== 0) {
+                alert('searching display name...');
+                var systemString = '';
+                codeSearching.forEach(s => {
+                    alert(JSON.stringify(s));
+                    systemString += '{"system" : "' + s.system + '", "filter": [{"property": "code", "op": "in", "value": "';
+                    s.code.forEach(c => {
+                        systemString += c + ", "
+                    });
+                    systemString += '"}]}';
+                });
+
+                alert('searching system string is ' + systemString);
+                var body = '{"resourceType": "Parameters", "parameter": [{"name": "valueSet", "resource": {"resourceType": "ValueSet", "compose": {"include": [' + systemString +']}}}, {"name": "count", "valueInteger": 100}]}';
+
+                alert('searching body is ' + body);
+
+                // Search for the VMPs
+                fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand", {
+                    method: 'POST',
+                    credentials: 'same-origin' ,
+                    headers: {
+                        'content-type': 'application/json',
+                        'authorization': 'Bearer ' + this.token
+                    },
+                    body: body
+                })
+                .then(response => {
+                    return response.json();
+                })
+                .then(json => {
+                    alert(JSON.stringify(json));
+                    json.expansion.contains.forEach(c => {
+                        if (dfi.code === c.code &&
+                            dfi.system === c.system) {
+                            this.sel_dfi = c.display;
+                        }
+                    });
+                    this.showVMP();
+                });
+            } else {
+                this.sel_dfi = dif.display;
+                this.showVMP();
+            }
         });
     }
 
