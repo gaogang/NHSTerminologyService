@@ -18,6 +18,11 @@
     margin-bottom: 0.75em;
 }
 
+.medication-list {
+    max-height: 450px;
+    overflow-y: auto;
+}
+
 .medication-type {
     background-color: blue;
     color: white;
