@@ -19,7 +19,7 @@
                   </lightning-layout-item>
                   <lightning-layout-item padding="around-small" size="6">
                       <div class="page-section page-right">
-                        <div data-id="vtmresults">
+                        <div data-id="vtmresults" class="slds-hidden">
                           <div class="medication-type">VMP</div>
                           <template for:each={sel_vmp} for:item="vmp">
                             <div class="medication-list-item" id={vmp.code} key={vmp.code} onclick={vmpClickHandler}>
@@ -52,8 +52,8 @@
                             <lightning-layout-item>
                               <p class="field">{sel_dfi}</p>
                               <p class="field">{sel_udfs}</p>
-                              <p class="field">{sel_udfs_uom.code}</p>
-                              <p class="field">{sel_unitdose_uom.code}</p>
+                              <p class="field">{sel_udfs_uom}</p>
+                              <p class="field">{sel_unitdose_uom}</p>
                             </lightning-layout-item>
                           </lightning-layout>
                           <p class="summary-heading">Summary</p>
@@ -67,14 +67,14 @@
                               <p class="field-title">Name Basis</p>
                             </lightning-layout-item>
                             <lightning-layout-item>
-                              <p class="field">{sel_prescribing_status.code}</p>
-                              <p class="field">{sel_controlled_drug_category.code}</p>
-                              <p class="field">{sel_route.code}</p>
-                              <p class="field">{sel_form.code}</p>
-                              <p class="field">{sel_ontology_form.code}</p>
-                              <p class="field">{sel_basis.code}</p>
+                              <p class="field">{sel_prescribing_status}</p>
+                              <p class="field">{sel_controlled_drug_category}</p>
+                              <p class="field">{sel_route}</p>
+                              <p class="field">{sel_form}</p>
+                              <p class="field">{sel_ontology_form}</p>
+                              <p class="field">{sel_basis}</p>
                             </lightning-layout-item>
-                          </lightning-layout>>
+                          </lightning-layout>
                         </div>
                       </div>
                   </lightning-layout-item>

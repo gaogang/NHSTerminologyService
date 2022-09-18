@@ -13,38 +13,14 @@ export default class MedicationFinder extends LightningElement {
     sel_vmp = [];
     sel_dfi = 'xxxxxx';
     sel_udfs = 0;
-    sel_udfs_uom = {
-        system: 'xxxxxx',
-        code: 'xxxxxx'
-    };
-    sel_unitdose_uom = {
-        system: 'xxxxxx',
-        code: 'xxxxxx'
-    };
-    sel_prescribing_status = {
-        system: 'xxxxxx',
-        code: 'xxxxxx'
-    };
-    sel_controlled_drug_category = {
-        system: 'xxxxxx',
-        code: 'xxxxxx'
-    };
-    sel_route = {
-        system: 'xxxxxx',
-        code: 'xxxxxx'
-    };
-    sel_form = {
-        system: 'xxxxxx',
-        code: 'xxxxxx'
-    };
-    sel_ontology_form = {
-        system: 'xxxxxx',
-        code: 'xxxxxx'
-    };
-    sel_basis = {
-        system: 'xxxxxx',
-        code: 'xxxxxx'
-    };
+    sel_udfs_uom = 'xxxxxx';
+    sel_unitdose_uom = 'xxxxxx';
+    sel_prescribing_status = 'xxxxxx';
+    sel_controlled_drug_category = 'xxxxxx';
+    sel_route = 'xxxxxx';
+    sel_form = 'xxxxxx';
+    sel_ontology_form = 'xxxxxx';
+    sel_basis = 'xxxxxx';
 
     codingSystems = [];
 
@@ -165,12 +141,9 @@ export default class MedicationFinder extends LightningElement {
 
     vmpClickHandler(event) {
         this.sel_code = event.currentTarget.getAttribute('id').replace('-93', '');
-        var dfi = {
-            system: "",
-            code: "",
-            display: ""
-        };
+        var medicationDetails = [];
 
+        console.log("Code: " + this.sel_code);
         // Search for VMP
         fetch("https://ontology.nhs.uk/production1/fhir/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
             method: 'GET',
@@ -184,7 +157,9 @@ export default class MedicationFinder extends LightningElement {
             return response.json();
         })
         .then(json => {
+            console.log("Medication found! - " + JSON.stringify(json));
             var codeSearching = [];
+            var counter = 0;
             json.parameter.forEach(element => {
                 if (element.name === 'display') {
                     this.sel_name = element.valueString;
@@ -203,23 +178,19 @@ export default class MedicationFinder extends LightningElement {
                             }
                         }
 
-                        var display = '';
-                        if (element.part[0].name === 'code' && element.part[0].valueCode === 'DF_INDCD') {
+                        if (element.part[0].name === 'code' &&
+                            element.part[1].name === 'valueCoding') {
+                            console.log(counter + ": system - " + element.part[1].valueCoding.system + " code - " + element.part[1].valueCoding.code);
                             var system = element.part[1].valueCoding.system;
-                            if (this.codingSystems[system]) {
-                                this.codingSystems[system].forEach(s => {
-                                    if (s === element.part[1].valueCoding.code) {
-                                        display = s.display;
-                                    }
-                                });
-                            }
+                            var code = element.part[1].valueCoding.code;
+                            var display = this.getDisplay(system, code);
 
                             if (display === '') {
                                 // Add code to the searching list
                                 var systemExist = false;
                                 codeSearching.forEach(cs => {
                                     if (cs.system === system) {
-                                        cs.code.push(element.part[1].valueCoding.code);
+                                        cs.code.push(code);
                                         systemExist = true;
                                     }
                                 });
@@ -227,80 +198,44 @@ export default class MedicationFinder extends LightningElement {
                                 if (!systemExist) {
                                     codeSearching.push({
                                         system: system,
-                                        code: [element.part[1].valueCoding.code]
+                                        code: [code]
                                     });
                                 }
                             }
 
-                            dfi = {
-                                system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code,
+                            medicationDetails.push({
+                                name: element.part[0].valueCode,
+                                system: system,
+                                code: code,
                                 display: display
-                            };
-                        } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'UDFS') {
-                            this.sel_udfs = element.part[1].valueDecimal;
-                        } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'UDFS_UOMCD') {
-                            this.sel_udfs_uom = {
-                                system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code
-                            }
-                        } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'UNIT_DOSE_UOMCD') {
-                            this.sel_unitdose_uom = {
-                                system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code
-                            }
-                        } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'PRES_STATCD') {
-                            this.sel_prescribing_status = {
-                                system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code
-                            }
-                        } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'CATCD') {
-                            this.sel_controlled_drug_category = {
-                                system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code
-                            }
-                        } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'ROUTECD') {
-                            this.sel_route = {
-                                system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code
-                            }
-                        } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'FORMCD') {
-                            this.sel_form = {
-                                system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code
-                            }
-                        } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'ONTFORMCD') {
-                            this.sel_ontology_form = {
-                                system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code
-                            }
-                        } else if (element.part[0].name === 'code' && element.part[0].valueCode === 'BASISCD') {
-                            this.sel_basis = {
-                                system: element.part[1].valueCoding.system,
-                                code: element.part[1].valueCoding.code
-                            }
+                            });
                         }
                     }
                 }
             });
-            
+
             // search for the missing display
-            if (codeSearching.length !== 0) {
-                alert('searching display name...');
+            var codeSearchingLength = codeSearching.length;
+            if (codeSearchingLength !== 0) {
                 var systemString = '';
+                var codeSearchingCount = 0;
                 codeSearching.forEach(s => {
-                    alert(JSON.stringify(s));
                     systemString += '{"system" : "' + s.system + '", "filter": [{"property": "code", "op": "in", "value": "';
                     s.code.forEach(c => {
                         systemString += c + ", "
                     });
+
                     systemString += '"}]}';
+                    
+                    if (codeSearchingCount < codeSearchingLength - 1) {
+                        systemString += ", ";
+                        codeSearchingCount++;
+                    }
                 });
 
-                alert('searching system string is ' + systemString);
                 var body = '{"resourceType": "Parameters", "parameter": [{"name": "valueSet", "resource": {"resourceType": "ValueSet", "compose": {"include": [' + systemString +']}}}, {"name": "count", "valueInteger": 100}]}';
 
-                alert('searching body is ' + body);
+                console.log('Searching for missing display - ' + body);
 
                 // Search for the VMPs
                 fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand", {
@@ -316,17 +251,21 @@ export default class MedicationFinder extends LightningElement {
                     return response.json();
                 })
                 .then(json => {
-                    alert(JSON.stringify(json));
                     json.expansion.contains.forEach(c => {
-                        if (dfi.code === c.code &&
-                            dfi.system === c.system) {
-                            this.sel_dfi = c.display;
-                        }
+                        medicationDetails.forEach(d => {
+                            if (d.system === c.system &&
+                                d.code === c.code) {
+                                console.log('Set missing display - ' + c.display);
+                                d.display = c.display;
+                            }
+                        });
                     });
+                    console.log('medication details - ' + JSON.stringify(medicationDetails));
+                    this.updateMedicationDetails(medicationDetails);
                     this.showVMP();
                 });
             } else {
-                this.sel_dfi = dif.display;
+                this.updateMedicationDetails(medicationDetails);
                 this.showVMP();
             }
         });
@@ -374,5 +313,43 @@ export default class MedicationFinder extends LightningElement {
         if(divblock){
             divblock.className='slds-hide';
         }
+    }
+
+    getDisplay(system, code) {
+        var display = '';
+        if (this.codingSystems[system]) {
+            this.codingSystems[system].forEach(s => {
+                if (s === code) {
+                    display = s.display;
+                }
+            });
+        }
+        return display;
+    }
+
+    updateMedicationDetails(medicationDetails) {
+        medicationDetails.forEach(d => {
+            if (d.name === 'DF_INDCD') {
+                this.sel_dfi = d.display;
+            } else if (d.name === 'UDFS') {
+                this.sel_udfs = d.display;
+            } else if (d.name === 'UDFS_UOMCD') {
+                this.sel_udfs_uom = d.display;
+            } else if (d.name === 'UNIT_DOSE_UOMCD') {
+                this.sel_unitdose_uom = d.display;
+            } else if (d.name === 'PRES_STATCD') {
+                this.sel_prescribing_status = d.display;
+            } else if (d.name === 'CATCD') {
+                this.sel_controlled_drug_category = d.display;
+            } else if (d.name === 'ROUTECD') {
+                this.sel_route = d.display;
+            } else if (d.name === 'FORMCD') {
+                this.sel_form = d.display;
+            } else if (d.name === 'ONTFORMCD') {
+                this.sel_ontology_form = d.display;
+            } else if (d.name === 'BASISCD') {
+                this.sel_basis = d.display;
+            }
+        });
     }
 }
