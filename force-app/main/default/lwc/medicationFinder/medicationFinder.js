@@ -21,6 +21,7 @@ export default class MedicationFinder extends LightningElement {
     sel_form = 'xxxxxx';
     sel_ontology_form = 'xxxxxx';
     sel_basis = 'xxxxxx';
+    sel_children = [];
 
     codingSystems = [];
 
@@ -160,6 +161,8 @@ export default class MedicationFinder extends LightningElement {
             console.log("Medication found! - " + JSON.stringify(json));
             var codeSearching = [];
             var counter = 0;
+
+            this.sel_children = [];
             json.parameter.forEach(element => {
                 if (element.name === 'display') {
                     this.sel_name = element.valueString;
@@ -176,6 +179,13 @@ export default class MedicationFinder extends LightningElement {
                             } else if (element.part[1].valueCode === 'AMP') {
                                 this.sel_type = 'AMP';
                             }
+                        }
+
+                        // Find Children
+                        if (element.part[0].name === 'code' && 
+                            element.part[0].valueCode === 'child' && 
+                            element.part[1].name === 'value') { 
+                            this.sel_children.push(element.part[1].valueCode);
                         }
 
                         if (element.part[0].name === 'code' &&
@@ -213,6 +223,12 @@ export default class MedicationFinder extends LightningElement {
                     }
                 }
             });
+
+            if (this.sel_children.length > 0) {
+                this.showChildrenView();
+            } else {
+                this.hideChildrenView();
+            }
 
             // search for the missing display
             var codeSearchingLength = codeSearching.length;
@@ -271,6 +287,42 @@ export default class MedicationFinder extends LightningElement {
         });
     }
 
+    childrenClickHandler(event) {
+        console.log('Number of children ' + this.sel_children.length);
+        if (this.sel_children.length === 0) {
+            return;
+        }
+
+        var searchingCodes = '';
+        this.sel_children.forEach(c => {
+            searchingCodes += c + ',';
+        });
+
+        var body = '{"resourceType": "Parameters", "parameter": [{"name": "valueSet", "resource": {"resourceType": "ValueSet", "compose": {"include": [{"system": "https://dmd.nhs.uk", "filter": [{"property": "code", "op": "in", "value": "' + searchingCodes +'"}]}]}}}, {"name": "count", "valueInteger": 100}]}';
+        // Search for the VMPs
+        fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand", {
+            method: 'POST',
+            credentials: 'same-origin' ,
+            headers: {
+                'content-type': 'application/json',
+                'authorization': 'Bearer ' + this.token
+            },
+            body: body
+        })
+        .then(response => {
+            return response.json();
+        })
+        .then(json => {
+            this.results = [{
+                code: this.sel_code,
+                display: this.sel_name
+            }];
+            this.sel_vmp = json.expansion.contains;
+        });
+
+        this.showVTM();
+    }
+
     showResult() {
         var divblock = this.template.querySelector('[data-id="searchresults"]');
         if(divblock){
@@ -294,6 +346,13 @@ export default class MedicationFinder extends LightningElement {
         }
     }
 
+    showChildrenView() {
+        var divblock = this.template.querySelector('[data-id="children-view"]');
+        if(divblock){
+            divblock.className='slds-show';
+        }
+    }
+
     hideResult() {
         var divblock = this.template.querySelector('[data-id="searchresults"]');
         if(divblock){
@@ -310,6 +369,13 @@ export default class MedicationFinder extends LightningElement {
 
     hideVMP() {
         var divblock = this.template.querySelector('[data-id="vmpresults"]');
+        if(divblock){
+            divblock.className='slds-hide';
+        }
+    }
+
+    hideChildrenView() {
+        var divblock = this.template.querySelector('[data-id="children-view"]');
         if(divblock){
             divblock.className='slds-hide';
         }

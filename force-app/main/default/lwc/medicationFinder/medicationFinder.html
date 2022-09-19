@@ -9,7 +9,6 @@
               <lightning-layout>
                   <lightning-layout-item padding="around-small" size="5">
                     <div class="page-section page-main">
-                      <div class="medication-type">VMT</div>
                       <div class="medication-list">
                         <template for:each={results} for:item="result">
                           <div class="medication-list-item" id={result.code} key={result.code} onclick={vtmClickHandler}>
@@ -17,13 +16,12 @@
                               <p>Name: {result.display}</p>
                           </div>
                         </template>
-                    </div>
+                      </div>
                     </div>
                   </lightning-layout-item>
                   <lightning-layout-item padding="around-small" size="7">
                       <div class="page-section page-right">
                         <div data-id="vtmresults" class="slds-hide">
-                          <div class="medication-type">VMP</div>
                           <div class="medication-list">
                             <template for:each={sel_vmp} for:item="vmp">
                               <div class="medication-list-item" id={vmp.code} key={vmp.code} onclick={vmpClickHandler}>
@@ -37,6 +35,10 @@
                           <div class="medication-type">{sel_type}</div>
                           <p class="summary-heading">Name</p>
                           <div>{sel_name}</div>
+                          <div data-id="children-view" class="slds-hide">
+                            <p class="summary-heading">Children</p>
+                            <div onclick={childrenClickHandler}>Show Children >></div>
+                          </div>
                           <p class="summary-heading">Code</p>
                           <lightning-layout>
                             <lightning-layout-item>
