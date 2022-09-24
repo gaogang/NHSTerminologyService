@@ -1,4 +1,5 @@
 import * as Constants from './utils';
+import * as Client from './secret';
 import { LightningElement } from 'lwc';
 
 export default class MedicationFinder extends LightningElement {
@@ -39,7 +40,7 @@ export default class MedicationFinder extends LightningElement {
             console.log('Access token not available - re-authenticate...');
             fetch(Constants.terminologyServerTokenUrl, {
                 method: 'POST',
-                body: 'grant_type=client_credentials&client_id=Salesforce_Consumer&client_secret=058a1404-26c4-450b-9acd-894610bfaed8',
+                body: 'grant_type=client_credentials&client_id=' + Client.key + '&client_secret=' + Client.secret,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
