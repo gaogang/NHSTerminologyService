@@ -1,2 +1,2 @@
-export const client_key = "";
-export const client_secret = "";
+export const key = "";
+export const secret = "";
