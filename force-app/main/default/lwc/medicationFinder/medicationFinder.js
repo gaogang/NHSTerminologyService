@@ -1,4 +1,4 @@
-import TickerSymbol from '@salesforce/schema/Account.TickerSymbol';
+import * as Constants from './utils';
 import { LightningElement } from 'lwc';
 
 export default class MedicationFinder extends LightningElement {
@@ -37,7 +37,7 @@ export default class MedicationFinder extends LightningElement {
 
         if (this.token === '') {
             console.log('Access token not available - re-authenticate...');
-            fetch("https://ontology.nhs.uk/authorisation/auth/realms/nhs-digital-terminology/protocol/openid-connect/token", {
+            fetch(Constants.terminologyServerTokenUrl, {
                 method: 'POST',
                 body: 'grant_type=client_credentials&client_id=Salesforce_Consumer&client_secret=058a1404-26c4-450b-9acd-894610bfaed8',
                 headers: {
@@ -54,7 +54,7 @@ export default class MedicationFinder extends LightningElement {
             })
             // Search for VTM
             .then(token => {
-                fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand?url=https://dmd.nhs.uk/ValueSet/VTM&count=10&&filter=" + this.searching + "&property=*", {
+                fetch(Constants.terminologyServerBase + "/ValueSet/$expand?url=https://dmd.nhs.uk/ValueSet/VTM&count=10&&filter=" + this.searching + "&property=*", {
                     method: 'GET',
                     credentials: 'same-origin' ,
                     headers: {
@@ -72,7 +72,7 @@ export default class MedicationFinder extends LightningElement {
             });
         } else {
             console.log('Access token available - start searching...');
-            fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand?url=https://dmd.nhs.uk/ValueSet/VTM&count=10&&filter=" + this.searching + "&property=*", {
+            fetch(Constants.terminologyServerBase + "/ValueSet/$expand?url=https://dmd.nhs.uk/ValueSet/VTM&count=10&&filter=" + this.searching + "&property=*", {
                 method: 'GET',
                 credentials: 'same-origin' ,
                 headers: {
@@ -96,7 +96,7 @@ export default class MedicationFinder extends LightningElement {
         this.sel_vmp = [];
         var searchingCodes = "";
         // Search for VTM
-        fetch("https://ontology.nhs.uk/production1/fhir/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
+        fetch(Constants.terminologyServerBase + "/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
             method: 'GET',
             credentials: 'same-origin' ,
             headers: {
@@ -121,7 +121,7 @@ export default class MedicationFinder extends LightningElement {
             if (searchingCodes.length !== 0) {
                 var body = '{"resourceType": "Parameters", "parameter": [{"name": "valueSet", "resource": {"resourceType": "ValueSet", "compose": {"include": [{"system": "https://dmd.nhs.uk", "filter": [{"property": "code", "op": "in", "value": "' + searchingCodes +'"}]}]}}}, {"name": "count", "valueInteger": 100}]}';
                 // Search for the VMPs
-                fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand", {
+                fetch(Constants.terminologyServerBase + "/ValueSet/$expand", {
                     method: 'POST',
                     credentials: 'same-origin' ,
                     headers: {
@@ -151,7 +151,7 @@ export default class MedicationFinder extends LightningElement {
 
         console.log("Code: " + this.sel_code);
         // Search for VMP
-        fetch("https://ontology.nhs.uk/production1/fhir/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
+        fetch(Constants.terminologyServerBase + "/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
             method: 'GET',
             credentials: 'same-origin' ,
             headers: {
@@ -260,7 +260,7 @@ export default class MedicationFinder extends LightningElement {
                 console.log('Searching for missing display - ' + body);
 
                 // Search for the VMPs
-                fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand", {
+                fetch(Constants.terminologyServerBase + "/ValueSet/$expand", {
                     method: 'POST',
                     credentials: 'same-origin' ,
                     headers: {
@@ -314,7 +314,7 @@ export default class MedicationFinder extends LightningElement {
 
         var body = '{"resourceType": "Parameters", "parameter": [{"name": "valueSet", "resource": {"resourceType": "ValueSet", "compose": {"include": [{"system": "https://dmd.nhs.uk", "filter": [{"property": "code", "op": "in", "value": "' + searchingCodes +'"}]}]}}}, {"name": "count", "valueInteger": 100}]}';
         // Search for the VMPs
-        fetch("https://ontology.nhs.uk/production1/fhir/ValueSet/$expand", {
+        fetch(Constants.terminologyServerBase + "/ValueSet/$expand", {
             method: 'POST',
             credentials: 'same-origin' ,
             headers: {
