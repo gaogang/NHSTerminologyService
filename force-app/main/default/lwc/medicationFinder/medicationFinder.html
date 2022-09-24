@@ -37,7 +37,17 @@
                           <div>{sel_name}</div>
                           <div data-id="children-view" class="slds-hide">
                             <p class="summary-heading">Children</p>
-                            <div onclick={childrenClickHandler}>Show Children >></div>
+                            <div data-id="show-hide-children" onclick={childrenClickHandler}>Show Children >></div>
+                            <div data-id="children-list-view" class="slds-hide">
+                              <div class="medication-list">
+                                <template for:each={sel_children_full} for:item="child">
+                                  <div class="medication-list-item" id={child.code} key={child.code} onclick={vmpClickHandler}>
+                                      <p>Code: {child.code}</p>
+                                      <p>Name: {child.display}</p>
+                                  </div>
+                                </template>
+                              </div>
+                            </div>
                           </div>
                           <p class="summary-heading">Code</p>
                           <lightning-layout>

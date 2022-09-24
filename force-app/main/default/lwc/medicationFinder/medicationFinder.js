@@ -22,6 +22,7 @@ export default class MedicationFinder extends LightningElement {
     sel_ontology_form = 'xxxxxx';
     sel_basis = 'xxxxxx';
     sel_children = [];
+    sel_children_full = [];
 
     codingSystems = [];
 
@@ -142,6 +143,10 @@ export default class MedicationFinder extends LightningElement {
 
     vmpClickHandler(event) {
         this.sel_code = event.currentTarget.getAttribute('id').replace('-93', '');
+        this.sel_children_full = [];
+
+        this.hideChildrenListView();
+
         var medicationDetails = [];
 
         console.log("Code: " + this.sel_code);
@@ -227,6 +232,7 @@ export default class MedicationFinder extends LightningElement {
             if (this.sel_children.length > 0) {
                 this.showChildrenView();
             } else {
+                this.hideChildrenListView();
                 this.hideChildrenView();
             }
 
@@ -288,6 +294,14 @@ export default class MedicationFinder extends LightningElement {
     }
 
     childrenClickHandler(event) {
+        if (this.template.querySelector('[data-id="show-hide-children"]').innerHTML 
+            === "Hide Children &lt;&lt;") {
+                console.log("Hide Children");
+            this.hideChildrenListView();
+            return;
+        }
+
+        console.log("Show Children");
         console.log('Number of children ' + this.sel_children.length);
         if (this.sel_children.length === 0) {
             return;
@@ -313,14 +327,9 @@ export default class MedicationFinder extends LightningElement {
             return response.json();
         })
         .then(json => {
-            this.results = [{
-                code: this.sel_code,
-                display: this.sel_name
-            }];
-            this.sel_vmp = json.expansion.contains;
+            this.sel_children_full = json.expansion.contains;
+            this.showChildrenListView();
         });
-
-        this.showVTM();
     }
 
     showResult() {
@@ -353,6 +362,15 @@ export default class MedicationFinder extends LightningElement {
         }
     }
 
+    showChildrenListView() {
+        var divblock = this.template.querySelector('[data-id="children-list-view"]');
+        if(divblock){
+            divblock.className='slds-show';
+        }
+
+        this.template.querySelector('[data-id="show-hide-children"]').innerHTML = "Hide Children <<";
+    }
+
     hideResult() {
         var divblock = this.template.querySelector('[data-id="searchresults"]');
         if(divblock){
@@ -379,6 +397,15 @@ export default class MedicationFinder extends LightningElement {
         if(divblock){
             divblock.className='slds-hide';
         }
+    }
+
+    hideChildrenListView() {
+        var divblock = this.template.querySelector('[data-id="children-list-view"]');
+        if(divblock){
+            divblock.className='slds-hide';
+        }
+
+        this.template.querySelector('[data-id="show-hide-children"]').innerHTML = "Show Children >>";
     }
 
     getDisplay(system, code) {
