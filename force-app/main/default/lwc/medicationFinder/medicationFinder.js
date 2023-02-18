@@ -40,7 +40,7 @@ export default class MedicationFinder extends LightningElement {
             console.log('Access token not available - re-authenticate...');
             fetch(Constants.terminologyServerTokenUrl, {
                 method: 'POST',
-                body: 'grant_type=client_credentials&client_id=' + Client.key + '&client_secret=' + Client.secret,
+                body: `grant_type=client_credentials&client_id=${Client.key}&client_secret=${Client.secret}`,
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
@@ -92,12 +92,15 @@ export default class MedicationFinder extends LightningElement {
     }
 
     vtmClickHandler(event) {
-        this.sel_code = event.currentTarget.getAttribute('id').replace('-93', '');
+        this.sel_code = event.currentTarget.getAttribute('id').replace('-97', '');
+        console.log(`vtmClickHandler: Selected VTM code - ${this.sel_code}`);
 
         this.sel_vmp = [];
         var searchingCodes = "";
         // Search for VTM
-        fetch(Constants.terminologyServerBase + "/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=" + this.sel_code + "&property=*", {
+        var terminologyServer = `${Constants.terminologyServerBase}/CodeSystem/$lookup?system=https://dmd.nhs.uk&code=${this.sel_code}&property=*`;
+        console.log(`vtmClickHandler: fetching data from - ${terminologyServer}`);
+        fetch(terminologyServer, {
             method: 'GET',
             credentials: 'same-origin' ,
             headers: {
@@ -143,7 +146,7 @@ export default class MedicationFinder extends LightningElement {
     }
 
     vmpClickHandler(event) {
-        this.sel_code = event.currentTarget.getAttribute('id').replace('-93', '');
+        this.sel_code = event.currentTarget.getAttribute('id').replace('-97', '');
         this.sel_children_full = [];
 
         this.hideChildrenListView();
